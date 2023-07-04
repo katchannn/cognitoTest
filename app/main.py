@@ -5,16 +5,6 @@ from typing import Optional
 import jwt
 from jwt.exceptions import InvalidTokenError
 
-
-"""
-AWS Cognitoから取得したJWTトークンを検証するサンプル
-
-1.署名の検証
-2.有効期限(exp)，オーディエンス(aud)，発行者(iss)，トークン使用用途(token_use)の検証
-
-参考:https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-verifying-a-jwt.html
-"""
-
 app = FastAPI()
 
 # Cognitoの設定
@@ -50,7 +40,7 @@ def create_token(
 
 # デモ用のトークン作成
 username = "your_username"
-secret = "your_secret_key"
+secret = "your_secret"
 token = create_token(username, secret)
 print(token)
 
@@ -68,7 +58,12 @@ async def authenticate_token(
     )
     try:
         token = api_key.split(" ")[1]  # Remove 'Bearer'
-        payload = jwt.decode(token, algorithms=["HS256"], options={"verify_signature": False})
+        print(token)
+        print(secret_key)
+        payload = jwt.decode(
+            token, secret_key, algorithm="HS256", options={"verify_exp": False}
+        )
+        print(payload)
 
         username = payload.get("username")
         if (
@@ -86,6 +81,6 @@ async def authenticate_token(
     return username
 
 
-@app.get("/", dependencies=[Depends(authenticate_token)])
-def read_root():
-    return {"Hello": "World"}
+@app.get("/test", dependencies=[Depends(authenticate_token)])
+def test():
+    return {"Congratulations!!!": "You are authenticated"}
