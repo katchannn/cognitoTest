@@ -61,7 +61,7 @@ async def authenticate_token(
         print(token)
         print(secret_key)
         payload = jwt.decode(
-            token, secret_key, algorithm="HS256", options={"verify_exp": False}
+            token, secret_key, algorithms=['HS256'], options={"verify_signature": False}
         )
         print(payload)
 
